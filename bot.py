@@ -31,8 +31,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-from pathlib import Path
-if Path(".env").exists():
+
   load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
