@@ -20,7 +20,7 @@ import random
 from pathlib import Path
 
 from dotenv import load_dotenv
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
 from telegram.constants import ParseMode
 from telegram.ext import (
     Application,
@@ -66,10 +66,12 @@ def cart_total(cart: dict) -> float:
 
 def main_menu_markup() -> InlineKeyboardMarkup:
     keyboard = [
+        [InlineKeyboardButton`): `[InlineKeyboardButton("🛖 Open Shop", web_app=WebAppInfo(url="https://kheangrithyreak.github.io/farmtools-store/"))],
         [InlineKeyboardButton("🛒 Browse tools / មើលទំនិញ", callback_data="browse")],
         [InlineKeyboardButton("🧺 View cart / មើលកន្ត្រក", callback_data="view_cart")],
     ]
     return InlineKeyboardMarkup(keyboard)
+          
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
