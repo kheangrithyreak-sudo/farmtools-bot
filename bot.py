@@ -67,7 +67,7 @@ def cart_total(cart: dict) -> float:
 
 def main_menu_markup() -> InlineKeyboardMarkup:
     keyboard = [
-        [InlineKeyboardButton("🛖 Open Shop", web_app=WebAppInfo(url="https://kheangrithyreak.github.io/farmtools-store/"))],
+        [InlineKeyboardButton("🛖 Open Shop", web_app=WebAppInfo(url="https://kheangrithyreak-sudo.github.io/farmtools-store/"))],
         [InlineKeyboardButton("🛒 Browse tools / មើលទំនិញ", callback_data="browse")],
         [InlineKeyboardButton("🧺 View cart / មើលកន្ត្រក", callback_data="view_cart")],
     ]
