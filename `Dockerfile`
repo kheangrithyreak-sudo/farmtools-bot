@@ -1,1 +1,1 @@
- ``` FROM python:3.12-slim WORKDIR /app COPY requirements.txt . RUN pip install --no-cache-dir -r requirements.txt COPY . . CMD ["python", "bot.py"] ``` This tells Docker (not Railway's mise system) to grab a ready-made Python 3.12 image directly, skip the broken install step entirely, install your two packages, and run your bot.
+ ``` FROM python:3.12-slim WORKDIR /app COPY requirements.txt . RUN pip install --no-cache-dir -r requirements.txt COPY . . CMD ["python", "bot.py"] ```
