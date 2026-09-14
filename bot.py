@@ -31,8 +31,9 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-
-load_dotenv()
+from pathlib import Path
+if Path(".env").exists():
+  load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID")  # optional: your own Telegram chat id
