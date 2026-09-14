@@ -3,4 +3,4 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-CMD ["sh", "-c", "env; sleep 3600"]
+CMD ["python", "bot.py"]
