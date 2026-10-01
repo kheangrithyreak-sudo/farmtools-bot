@@ -1,7 +1,7 @@
 """
-Telcom Tech — Telegram storefront bot
+Dai Kasekor (Farmer's Hand) — Telegram storefront bot
 ------------------------------------------------------
-A demo Telegram bot for selling PBX and phone systems (IKE PBX, Panaphone, etc.).
+A demo Telegram bot for selling farm hand tools (hoe, sickle, etc.).
 No real payment is processed — checkout just confirms order details
 and (optionally) forwards the order to an admin chat.
 
@@ -22,7 +22,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from telegram import (
-    BotCommand,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     KeyboardButton,
@@ -53,12 +52,12 @@ log = logging.getLogger(__name__)
 
 # ---- Catalog (keep this in sync with the website's product list) ----
 PRODUCTS = [
-    {"id": "pbx408p", "name": "IKE PBX 408P", "desc": "Analog PBX telephone system for small offices and shops.", "price": 70.00},
-    {"id": "pbx416p", "name": "IKE PBX 416P", "desc": "Analog PBX telephone system for small offices and guesthouses.", "price": 120.00},
-    {"id": "pbx424p", "name": "IKE PBX 424P", "desc": "Analog PBX telephone system for offices, factories and guesthouses.", "price": 170.00},
-    {"id": "pbx432p", "name": "IKE PBX 432P", "desc": "Analog PBX telephone system for larger offices and schools.", "price": 220.00},
-    {"id": "pbx2000b", "name": "IKE PBX 2000B (64EXT)", "desc": "Analog PBX telephone system for schools, hospitals and hotels — 64 extensions.", "price": 420.00},
-    {"id": "panaphone", "name": "Panaphone Call ID", "desc": "Corded desk phone with caller ID display.", "price": 15.00},
+    {"id": "hoe", "name": "Hoe (ចប)", "desc": "For tilling and weeding garden or paddy soil.", "price": 6.50},
+    {"id": "sickle", "name": "Sickle (កណ្ដៀវ)", "desc": "Curved blade for harvesting rice and cutting grass.", "price": 4.00},
+    {"id": "rake", "name": "Garden Rake", "desc": "Clears debris and levels soil before planting.", "price": 5.50},
+    {"id": "machete", "name": "Machete", "desc": "Heavy blade for clearing brush.", "price": 8.00},
+    {"id": "watercan", "name": "Watering Can", "desc": "6-litre galvanized can for seedling beds.", "price": 7.20},
+    {"id": "plowblade", "name": "Plow Blade", "desc": "Replacement steel blade for hand-pulled plows.", "price": 11.00},
 ]
 PRODUCTS_BY_ID = {p["id"]: p for p in PRODUCTS}
 
@@ -74,16 +73,13 @@ def cart_total(cart: dict) -> float:
     return sum(PRODUCTS_BY_ID[pid]["price"] * qty for pid, qty in cart.items())
 
 
-SHOP_URL = "https://kheangrithyreak-sudo.github.io/TelcomTech_store/"
-CONTACT_URL = "https://t.me/NopRavy7"  # opens the owner's personal Telegram chat
-MENU_BUTTON_TEXT = "🏠 Menu"
+SHOP_URL = "https://kheangrithyreak-sudo.github.io/farmtools-store/"
 
 
 def main_menu_markup() -> InlineKeyboardMarkup:
     keyboard = [
-        [InlineKeyboardButton("🛒 Browse products / មើលទំនិញ", callback_data="browse")],
+        [InlineKeyboardButton("🛒 Browse tools / មើលទំនិញ", callback_data="browse")],
         [InlineKeyboardButton("🧺 View cart / មើលកន្ត្រក", callback_data="view_cart")],
-        [InlineKeyboardButton("📞 Contact us / ទាក់ទងយើង", url=CONTACT_URL)],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -91,15 +87,9 @@ def main_menu_markup() -> InlineKeyboardMarkup:
 def shop_keyboard() -> ReplyKeyboardMarkup:
     # A Mini App opened from a *keyboard* button (unlike an inline button)
     # is allowed to send data back to the bot via Telegram.WebApp.sendData().
-    # is_persistent keeps these buttons on screen so customers never have to
-    # type /start again.
     return ReplyKeyboardMarkup(
-        [[
-            KeyboardButton("🛖 Open Shop", web_app=WebAppInfo(url=SHOP_URL)),
-            KeyboardButton(MENU_BUTTON_TEXT),
-        ]],
+        [[KeyboardButton("🛖 Open Shop", web_app=WebAppInfo(url=SHOP_URL))]],
         resize_keyboard=True,
-        is_persistent=True,
     )
 
 
@@ -138,29 +128,16 @@ async def mark_order_seen(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
-        "សូមស្វាគមន៍មកកាន់ *Telcom Tech* 👋\n"
-        "Welcome to *Telcom Tech — PBX and Phone Shop*.\n\n"
-        "Browse our Telcom Tech Shop and add what you need to your cart. "
+        "សូមស្វាគមន៍មកកាន់ *ដៃកសិករ* 👋\n"
+        "Welcome to *Dai Kasekor — Farmer's Hand Tools*.\n\n"
+        "Browse our hand tools below and add what you need to your cart. "
         "This is a demo shop — no real payment is taken."
     )
     await update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN, reply_markup=main_menu_markup())
     await update.message.reply_text(
-        "Use the buttons at the bottom any time — no need to type /start:",
+        "Tap the button below any time to open the shop directly:",
         reply_markup=shop_keyboard(),
     )
-
-
-async def text_fallback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Any plain message outside checkout brings the menu back."""
-    if update.message.text == MENU_BUTTON_TEXT:
-        await update.message.reply_text(
-            "What would you like to do? / តើអ្នកចង់ធ្វើអ្វី?",
-            reply_markup=main_menu_markup(),
-        )
-    else:
-        # Someone typed something else (or their bottom buttons vanished):
-        # show the full welcome again, which also restores the buttons.
-        await start(update, context)
 
 
 async def browse(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -172,7 +149,7 @@ async def browse(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     keyboard.append([InlineKeyboardButton("⬅️ Back", callback_data="menu")])
     await query.edit_message_text(
-        "*Our products / ទំនិញរបស់យើង*\nTap an item to see details.",
+        "*Our tools / ទំនិញរបស់យើង*\nTap an item to see details.",
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
@@ -207,7 +184,7 @@ async def add_to_cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def render_cart_text(cart: dict) -> str:
     if not cart:
-        return "Your cart is empty. Tap *Browse products* to add something."
+        return "Your cart is empty. Tap *Browse tools* to add something."
     lines = ["*Your cart / កន្ត្រករបស់អ្នក*\n"]
     for pid, qty in cart.items():
         p = PRODUCTS_BY_ID[pid]
@@ -289,7 +266,7 @@ async def checkout_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def checkout_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["checkout_address"] = update.message.text.strip()
     cart = get_cart(context)
-    order_ref = f"TT-{random.randint(100000, 999999)}"
+    order_ref = f"DK-{random.randint(100000, 999999)}"
     order_date = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     order = {
@@ -365,7 +342,7 @@ async def web_app_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    order_ref = payload.get("ref") or f"TT-{random.randint(100000, 999999)}"
+    order_ref = payload.get("ref") or f"DK-{random.randint(100000, 999999)}"
     order_date = datetime.now().strftime("%Y-%m-%d %H:%M")
     name = payload.get("name", "")
     phone = payload.get("phone", "")
@@ -417,49 +394,25 @@ async def web_app_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             log.warning("Could not notify admin: %s", e)
 
 
-async def post_init(application: Application):
-    """Runs once when the bot starts. Sets the command list and the intro
-    text people see above Telegram's built-in START button."""
-    try:
-        await application.bot.set_my_commands([BotCommand("start", "Open the shop menu")])
-        await application.bot.set_my_description(
-            "សូមស្វាគមន៍មកកាន់ Telcom Tech\n"
-            "Telcom Tech — PBX and Phone Shop. Tap START to browse IKE PBX systems "
-            "and Panaphone phones, then order right here in Telegram."
-        )
-    except Exception as e:
-        log.warning("Could not update the bot's description/commands: %s", e)
-
-
 def main():
     if not BOT_TOKEN:
         raise SystemExit("BOT_TOKEN is not set. Copy .env.example to .env and fill it in.")
 
-    app = Application.builder().token(BOT_TOKEN).post_init(post_init).build()
-
-    # The bottom "Menu" button sends this exact text. During checkout it must not
-    # be mistaken for a name/phone/address answer.
-    menu_text = filters.Regex(f"^{MENU_BUTTON_TEXT}$")
-    answer = filters.TEXT & ~filters.COMMAND & ~menu_text
+    app = Application.builder().token(BOT_TOKEN).build()
 
     checkout_conv = ConversationHandler(
         entry_points=[CallbackQueryHandler(checkout_start, pattern="^checkout$")],
         states={
-            ASK_NAME: [MessageHandler(answer, checkout_name)],
-            ASK_PHONE: [MessageHandler(answer, checkout_phone)],
-            ASK_ADDRESS: [MessageHandler(answer, checkout_address)],
+            ASK_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, checkout_name)],
+            ASK_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, checkout_phone)],
+            ASK_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, checkout_address)],
         },
-        fallbacks=[
-            CommandHandler("cancel", checkout_cancel),
-            MessageHandler(menu_text, checkout_cancel),
-        ],
+        fallbacks=[CommandHandler("cancel", checkout_cancel)],
     )
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(checkout_conv)
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_order))
-    # Must come after the checkout conversation so it never steals checkout answers.
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_fallback))
     app.add_handler(CallbackQueryHandler(browse, pattern="^browse$"))
     app.add_handler(CallbackQueryHandler(view_cart, pattern="^view_cart$"))
     app.add_handler(CallbackQueryHandler(back_to_menu, pattern="^menu$"))
